@@ -1112,6 +1112,7 @@ files = [
 numpy = [
     {version = ">=1.22.4,<2", markers = "python_version < \"3.11\""},
     {version = ">=1.23.2,<2", markers = "python_version == \"3.11\""},
+    {version = ">=1.26.0,<2", markers = "python_version >= \"3.12\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -1734,5 +1735,5 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<3.12"
-content-hash = "bdda8502052e1da9f2ae370f236500d0a44747df45ca41af461e09f468af13ec"
+python-versions = ">=3.9,<4.0"
+content-hash = "391f70f5253df82ec68c3bbecc1a2bb29f9819accb42d1adc0091f29179a2daf"

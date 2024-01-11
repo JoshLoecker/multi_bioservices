@@ -6,9 +6,9 @@ import pandas as pd
 from bioservices import BioDBNet
 from tqdm import tqdm
 
-from multi_bioservices.input_database import InputDatabase
-from multi_bioservices.output_database import OutputDatabase
-from multi_bioservices.taxon_id import TaxonID
+from multi_bioservices.db2db.input_database import InputDatabase
+from multi_bioservices.db2db.output_database import OutputDatabase
+from multi_bioservices.db2db.taxon_id import TaxonID
 from multi_bioservices.utils import get_biodbnet
 
 _DEFAULT_OUTPUT_DB: Iterable[OutputDatabase] = (
