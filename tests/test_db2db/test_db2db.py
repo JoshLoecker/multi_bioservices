@@ -3,12 +3,6 @@ import pytest
 from multi_bioservices.biodbnet import InputDatabase, OutputDatabase, TaxonID, db2db
 
 
-# Cache tests
-# 1: This uses async_cache, but it will be a cache miss. Retrieve results from server and cache them
-# 2: This uses async_cache, but it will be a cache hit. Retrieve results from cache
-# 3: This uses biodbnet_cache, but it will be a cache miss. Retrieve results from server and cache them
-# 4: This uses biodbnet_cache, but it will be a cache hit. Retrieve results from cache
-# 5: This does not use any cache. Retrieve results from server and do not cache them
 @pytest.mark.parametrize("taxon_id", [TaxonID.HOMO_SAPIENS, TaxonID.MUS_MUSCULUS])
 def test_fetch_gene_info(taxon_id):
     if taxon_id == TaxonID.HOMO_SAPIENS:

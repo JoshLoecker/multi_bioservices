@@ -4,10 +4,10 @@ from typing import Iterable, List, Union
 
 import pandas as pd
 from bioservices import BioDBNet
-from multi_bioservices import get_biodbnet
 from multi_bioservices.biodbnet.input_database import InputDatabase
 from multi_bioservices.biodbnet.output_database import OutputDatabase
 from multi_bioservices.biodbnet.taxon_id import TaxonID
+from multi_bioservices.utils import get_biodbnet
 from tqdm import tqdm
 
 _DEFAULT_OUTPUT_DB: Iterable[OutputDatabase] = (
