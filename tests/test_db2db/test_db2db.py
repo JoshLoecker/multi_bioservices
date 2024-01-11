@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from multi_bioservices import InputDatabase, OutputDatabase, TaxonID, db2db
+from multi_bioservices.db2db import InputDatabase, OutputDatabase, TaxonID, db2db
 
 
 # Cache tests
@@ -40,13 +40,9 @@ def test_fetch_gene_info(taxon_id):
         assert result[result["Gene ID"] == "21898"]["Gene Symbol"].values[0] == "Tlr4"
 
 
+@pytest.mark.parametrize("input_values", [["1", "2", "3", "4"], ["1", "1"]])
 @pytest.mark.parametrize("remove_duplicates", [True, False])
-def test_duplicate_removal(remove_duplicates):
-    if remove_duplicates:
-        input_values = ["1", "2", "3", "4"]
-    else:
-        input_values = ["1", "1", "1", "1"]
-    
+def test_duplicate_removal(input_values, remove_duplicates):
     result: pd.DataFrame = db2db(
         input_values=input_values,
         input_db=InputDatabase.GENE_ID,
@@ -55,7 +51,10 @@ def test_duplicate_removal(remove_duplicates):
         remove_duplicates=remove_duplicates
     )
     
-    assert len(result) == len(set(input_values))
+    if remove_duplicates:
+        assert len(result) == len(set(input_values))
+    else:
+        assert len(result) == len(input_values)
 
 
 @pytest.mark.parametrize("cache", [False, True])

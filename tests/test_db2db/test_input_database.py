@@ -1,4 +1,4 @@
-from multi_bioservices.input_database import InputDatabase
+from multi_bioservices.db2db import InputDatabase
 
 
 def test_name():

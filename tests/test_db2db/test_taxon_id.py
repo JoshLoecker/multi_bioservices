@@ -1,5 +1,4 @@
-from multi_bioservices.taxon_id import TaxonID
-
+from multi_bioservices.db2db import TaxonID
 
 def test_taxon_ids_values():
     assert TaxonID.HOMO_SAPIENS.value == 9606
