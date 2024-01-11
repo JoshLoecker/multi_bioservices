@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from multi_bioservices.db2db import InputDatabase, OutputDatabase, TaxonID, db2db
+from multi_bioservices.biodbnet import InputDatabase, OutputDatabase, TaxonID, db2db
 
 
 # Cache tests

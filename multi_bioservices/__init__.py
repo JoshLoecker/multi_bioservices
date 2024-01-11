@@ -1,1 +1,2 @@
-from multi_bioservices.db2db import db2db, InputDatabase, OutputDatabase, TaxonID
+from multi_bioservices.biodbnet import InputDatabase, OutputDatabase, TaxonID, db2db
+from multi_bioservices.utils import get_biodbnet

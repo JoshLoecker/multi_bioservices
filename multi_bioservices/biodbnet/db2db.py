@@ -4,12 +4,11 @@ from typing import Iterable, List, Union
 
 import pandas as pd
 from bioservices import BioDBNet
+from multi_bioservices import get_biodbnet
+from multi_bioservices.biodbnet.input_database import InputDatabase
+from multi_bioservices.biodbnet.output_database import OutputDatabase
+from multi_bioservices.biodbnet.taxon_id import TaxonID
 from tqdm import tqdm
-
-from multi_bioservices.db2db.input_database import InputDatabase
-from multi_bioservices.db2db.output_database import OutputDatabase
-from multi_bioservices.db2db.taxon_id import TaxonID
-from multi_bioservices.utils import get_biodbnet
 
 _DEFAULT_OUTPUT_DB: Iterable[OutputDatabase] = (
     OutputDatabase.GENE_SYMBOL,
@@ -82,15 +81,3 @@ def db2db(
         # Remove rows that have duplicates in the input_db_value
         conversion_df = conversion_df.drop_duplicates(subset=[input_db_value])
     return conversion_df
-
-
-if __name__ == "__main__":
-    df = db2db(
-        input_values=[str(i) for i in range(100)],
-        input_db=InputDatabase.GENE_ID,
-        output_db=OutputDatabase.ENSEMBL_GENE_ID,
-        taxon_id=TaxonID.HOMO_SAPIENS,
-        chunk_size=25,
-        progress_bar=True,
-    )
-    print(df)
