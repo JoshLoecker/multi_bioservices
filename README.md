@@ -25,7 +25,7 @@ pip install multi_bioservices
 To use `multi_bioservices`, simply import the `db2db` function and call it with the relevant parameters
 
 ```python
-from multi_bioservices import db2db, InputDatabase, OutputDatabase, TaxonID
+from multi_bioservices.biodbnet import db2db, InputDatabase, OutputDatabase, TaxonID
 
 db2db(
     input_values=["1", "2", "3"],
