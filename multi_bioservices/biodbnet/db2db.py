@@ -1,4 +1,5 @@
 import logging
+import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
@@ -32,9 +33,11 @@ def _execute(
     input_db: str,
     output_db: str,
     taxon_id: int,
-    progress_bar: Union[tqdm, None],
+    sleep_time: float
+    # progress_bar: Union[tqdm, None],
 ) -> pd.DataFrame | list[str]:
     try:
+        time.sleep(sleep_time)
         results = biodbnet.db2db(
             input_values=input_values,
             input_db=input_db,
@@ -75,13 +78,13 @@ def db2db(
     output_db: Union[OutputDatabase, Iterable[OutputDatabase]] = _DEFAULT_OUTPUT_DB,
     taxon_id: Union[TaxonID, int] = TaxonID.HOMO_SAPIENS,
     remove_duplicates: bool = False,
-    max_threads: int = 5,
     chunk_size: int = 300,
     cache: bool = True,
     verbose: bool = False,
     progress_bar: bool = False,
     tqdm_kwargs: dict = None
 ) -> pd.DataFrame:
+    max_threads: int = 5
     input_values: List[str] = list(map(str, input_values))
     taxon_id_value: int = int(taxon_id.value) if isinstance(taxon_id, TaxonID) else int(taxon_id)
     input_db_value: str = input_db.value
@@ -93,7 +96,6 @@ def db2db(
         raise ValueError("Input database cannot be in output database")
     
     # Validate input settings
-    max_threads = min(max_threads, 20)
     if chunk_size > 500 and taxon_id_value == TaxonID.HOMO_SAPIENS.value:
         print(f"Batch length greater than the maximum value of 500 for Homo Sapiens."
               f"Automatically setting batch length to 500")
@@ -118,7 +120,8 @@ def db2db(
         input_db=input_db_value,
         output_db=output_db_values,
         taxon_id=taxon_id_value,
-        progress_bar=pbar
+        sleep_time=random.uniform(0, 5)
+        # progress_bar=pbar
     )
     
     queue_length: int = 0
@@ -181,5 +184,4 @@ if __name__ == '__main__':
         output_db=OutputDatabase.GENE_SYMBOL,
         taxon_id=TaxonID.MUS_MUSCULUS,
         progress_bar=True,
-        max_threads=20
     )
