@@ -141,7 +141,6 @@ def db2db(
                     
                     continue
                 elif result.empty:
-                    print("Trying again, empty dataframe")
                     continue
                 else:
                     if use_progress_bar:
