@@ -1,9 +1,11 @@
+import logging
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
+from multiprocessing import Queue, Value
 from typing import Iterable, List, Union
 
 import pandas as pd
-from bioservices import BioDBNet
 from multi_bioservices.biodbnet.input_database import InputDatabase
 from multi_bioservices.biodbnet.output_database import OutputDatabase
 from multi_bioservices.biodbnet.taxon_id import TaxonID
@@ -15,6 +17,56 @@ _DEFAULT_OUTPUT_DB: Iterable[OutputDatabase] = (
     OutputDatabase.GENE_ID,
     OutputDatabase.CHROMOSOMAL_LOCATION
 )
+
+# Catch bioDBnet logging messages
+# biodbnet_logger = logging.getLogger("bioservices.BioDBNet")
+# biodbnet_logger.disabled = True
+from bioservices import BioDBNet
+
+# _sleep_count: Value = Value('i', 0)
+
+
+def _execute(
+    biodbnet: BioDBNet,
+    input_values: list[str],
+    input_db: str,
+    output_db: str,
+    taxon_id: int,
+    progress_bar: Union[tqdm, None],
+) -> pd.DataFrame | list[str]:
+    try:
+        results = biodbnet.db2db(
+            input_values=input_values,
+            input_db=input_db,
+            output_db=output_db,
+            taxon=taxon_id
+        )
+    except TypeError:
+        return input_values
+        # if progress_bar is not None:
+        #     with _sleep_count.get_lock():
+        #         _sleep_count.value += 1
+        #         progress_bar.set_postfix_str(s=f"request limit reached - retry count: {_sleep_count.value}")
+        #     time.sleep(5)
+        #
+        # first_half = input_values[:max(1, len(input_values) // 2)]
+        # second_half = input_values[max(1, len(input_values) // 2):]
+        #
+        # first_half_results = biodbnet.db2db(
+        #     input_values=first_half,
+        #     input_db=input_db,
+        #     output_db=output_db,
+        #     taxon=taxon_id
+        # )
+        # second_half_results = biodbnet.db2db(
+        #     input_values=second_half,
+        #     input_db=input_db,
+        #     output_db=output_db,
+        #     taxon=taxon_id
+        # )
+        # results = pd.concat([first_half_results, second_half_results])
+    
+    return results
 
 
 def db2db(
@@ -53,27 +105,64 @@ def db2db(
     
     # Perform conversion using BioDBNet's db2db
     conversion_df: pd.DataFrame = pd.DataFrame()
-    biodbnet: BioDBNet = get_biodbnet(verbose=verbose, cache=cache)
-    partial_func = partial(biodbnet.db2db, input_db=input_db_value, output_db=output_db_values, taxon=taxon_id_value)
+    biodbnet: BioDBNet = get_biodbnet(verbose=verbose, cache=False)
+    pbar = None
     if progress_bar:
         tqdm_kwargs = tqdm_kwargs or {}
         total = tqdm_kwargs.pop("total", len(input_values))
         pbar = tqdm(total=total, **tqdm_kwargs)
     
+    partial_func = partial(
+        _execute,
+        biodbnet=biodbnet,
+        input_db=input_db_value,
+        output_db=output_db_values,
+        taxon_id=taxon_id_value,
+        progress_bar=pbar
+    )
+    
+    queue_length: int = 0
+    item_queue: Queue = Queue()
+    for chunk in range(0, len(input_values), chunk_size):
+        item_queue.put(input_values[chunk:chunk + chunk_size])
+        queue_length += 1
+    
+    failed_count: int = 0
+    sleep_count: int = 0
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
-        futures = [
-            executor.submit(partial_func, input_values=input_values[i:i + chunk_size])
-            for i in range(0, len(input_values), chunk_size)
-        ]
-        
-        for future in as_completed(futures):
-            if progress_bar:
-                pbar.update(chunk_size)
+        while not item_queue.empty():
+            futures = [
+                executor.submit(partial_func, input_values=item_queue.get())
+                for _ in range(queue_length)
+            ]
             
-            conversion_df = pd.concat([
-                conversion_df,
-                future.result()
-            ])
+            for future in as_completed(futures):
+                future_result = future.result()
+                
+                if isinstance(future_result, list):
+                    pbar.set_postfix_str(
+                        f"failed count: {failed_count}, max threads: {max_threads}, sleep count: {sleep_count}")
+                    failed_count += 1
+                    item_queue.put(future_result)
+                    
+                    if failed_count % max_threads == 0:
+                        pbar.set_postfix_str(
+                            f"failed count: {failed_count}, max threads: {max_threads}, sleep count: {sleep_count}")
+                        # Reduce max workers by 1
+                        max_threads = max(max_threads - 1, 1)
+                        executor._max_workers = max_threads
+                        sleep_count += 1
+                        time.sleep(5)
+                    
+                    continue
+                
+                if progress_bar:
+                    pbar.update(chunk_size)
+                
+                conversion_df = pd.concat([
+                    conversion_df,
+                    future_result
+                ])
     
     conversion_df = conversion_df.reset_index(names=[input_db_value])
     
@@ -81,3 +170,16 @@ def db2db(
         # Remove rows that have duplicates in the input_db_value
         conversion_df = conversion_df.drop_duplicates(subset=[input_db_value])
     return conversion_df
+
+
+if __name__ == '__main__':
+    print("Starting")
+    inputs = [str(i) for i in range(100_000)]
+    df = db2db(
+        input_values=inputs,
+        input_db=InputDatabase.GENE_ID,
+        output_db=OutputDatabase.GENE_SYMBOL,
+        taxon_id=TaxonID.MUS_MUSCULUS,
+        progress_bar=True,
+        max_threads=20
+    )
