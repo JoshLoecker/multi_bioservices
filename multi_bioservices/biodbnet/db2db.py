@@ -1,12 +1,12 @@
-import logging
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
-from multiprocessing import Queue, Value
+from multiprocessing import Queue
 from typing import Iterable, List, Union
 
 import pandas as pd
+from bioservices import BioDBNet
 from multi_bioservices.biodbnet.input_database import InputDatabase
 from multi_bioservices.biodbnet.output_database import OutputDatabase
 from multi_bioservices.biodbnet.taxon_id import TaxonID
@@ -18,13 +18,6 @@ _DEFAULT_OUTPUT_DB: Iterable[OutputDatabase] = (
     OutputDatabase.GENE_ID,
     OutputDatabase.CHROMOSOMAL_LOCATION
 )
-
-# Catch bioDBnet logging messages
-# biodbnet_logger = logging.getLogger("bioservices.BioDBNet")
-# biodbnet_logger.disabled = True
-from bioservices import BioDBNet
-
-# _sleep_count: Value = Value('i', 0)
 
 
 def _execute(
@@ -107,7 +100,7 @@ def db2db(
     
     # Perform conversion using BioDBNet's db2db
     conversion_df: pd.DataFrame = pd.DataFrame()
-    biodbnet: BioDBNet = get_biodbnet(verbose=verbose, cache=False)
+    biodbnet: BioDBNet = get_biodbnet(verbose=verbose, cache=cache)
     pbar = None
     if progress_bar:
         tqdm_kwargs = tqdm_kwargs or {}
