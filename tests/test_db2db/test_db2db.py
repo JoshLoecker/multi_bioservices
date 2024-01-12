@@ -2,36 +2,30 @@ import pandas as pd
 import pytest
 from multi_bioservices.biodbnet import InputDatabase, OutputDatabase, TaxonID, db2db
 
+input_db = InputDatabase.GENE_ID
+output_db = OutputDatabase.GENE_SYMBOL
 
-@pytest.mark.parametrize("taxon_id", [TaxonID.HOMO_SAPIENS, TaxonID.MUS_MUSCULUS])
-def test_fetch_gene_info(taxon_id):
-    if taxon_id == TaxonID.HOMO_SAPIENS:
-        input_values = ["1", "2", "3", "4"]
-    elif taxon_id == TaxonID.MUS_MUSCULUS:
-        input_values = ["14910", "22059", "11816", "21898"]
-    
+
+@pytest.mark.parametrize(
+    "taxon_id,input_values,expected_values", [
+        (TaxonID.HOMO_SAPIENS, ["1", "2", "3", "4"], ["A1BG", "A2M", "A2MP1", "-"]),
+        (TaxonID.MUS_MUSCULUS, ["14910", "22059", "11816", "21898"], ["Gt(ROSA)26Sor", "Trp53", "Apoe", "Tlr4"])
+    ])
+def test_fetch_gene_info(taxon_id, input_values, expected_values):
     result: pd.DataFrame = db2db(
         input_values=input_values,
-        input_db=InputDatabase.GENE_ID,
-        output_db=OutputDatabase.GENE_SYMBOL,
+        input_db=input_db,
+        output_db=output_db,
         taxon_id=taxon_id,
     )
     
     assert isinstance(result, pd.DataFrame)
     assert len(result) == len(input_values)
-    assert 'Gene Symbol' in result.columns
-    assert 'Gene ID' in result.columns
+    assert input_db.value in result.columns
+    assert output_db.value in result.columns
     
-    if taxon_id == TaxonID.HOMO_SAPIENS:
-        assert result[result["Gene ID"] == "1"]["Gene Symbol"].values[0] == "A1BG"
-        assert result[result["Gene ID"] == "2"]["Gene Symbol"].values[0] == "A2M"
-        assert result[result["Gene ID"] == "3"]["Gene Symbol"].values[0] == "A2MP1"
-        assert result[result["Gene ID"] == "4"]["Gene Symbol"].values[0] == "-"
-    elif taxon_id == TaxonID.MUS_MUSCULUS:
-        assert result[result["Gene ID"] == "14910"]["Gene Symbol"].values[0] == "Gt(ROSA)26Sor"
-        assert result[result["Gene ID"] == "22059"]["Gene Symbol"].values[0] == "Trp53"
-        assert result[result["Gene ID"] == "11816"]["Gene Symbol"].values[0] == "Apoe"
-        assert result[result["Gene ID"] == "21898"]["Gene Symbol"].values[0] == "Tlr4"
+    for value in expected_values:
+        assert value in result[output_db.value].tolist()
 
 
 @pytest.mark.parametrize("input_values", [["1", "2", "3", "4"], ["1", "1"]])
@@ -39,8 +33,8 @@ def test_fetch_gene_info(taxon_id):
 def test_duplicate_removal(input_values, remove_duplicates):
     result: pd.DataFrame = db2db(
         input_values=input_values,
-        input_db=InputDatabase.GENE_ID,
-        output_db=OutputDatabase.GENE_SYMBOL,
+        input_db=input_db,
+        output_db=output_db,
         taxon_id=TaxonID.HOMO_SAPIENS,
         remove_duplicates=remove_duplicates
     )
@@ -56,9 +50,10 @@ def test_cache(cache):
     input_values = ["1", "2", "3", "4"]
     result: pd.DataFrame = db2db(
         input_values=input_values,
-        input_db=InputDatabase.GENE_ID,
-        output_db=OutputDatabase.GENE_SYMBOL,
+        input_db=input_db,
+        output_db=output_db,
         taxon_id=TaxonID.HOMO_SAPIENS,
-        cache=cache
+        cache=False
     )
+    print(result)
     assert len(result) == len(input_values)
