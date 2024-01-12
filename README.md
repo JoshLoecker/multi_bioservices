@@ -1,9 +1,9 @@
 # Multi Bioservices
 
-![PyPI - Version](https://img.shields.io/pypi/v/async_bioservices?style=for-the-badge&logo=PyPy&logoColor=white&color=red)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/JoshLoecker/async_bioservices/tests.yml?style=for-the-badge&logo=pytest&logoColor=white&label=Tests)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async_bioservices?style=for-the-badge&logo=python&logoColor=white)
-![Coveralls branch](https://img.shields.io/coverallsCoverage/github/JoshLoecker/async_bioservices?branch=master&style=for-the-badge&logo=coveralls&logoColor=white)
+![PyPI - Version](https://img.shields.io/pypi/v/multi_bioservices?style=for-the-badge&logo=PyPy&logoColor=white&color=red)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/JoshLoecker/multi_bioservices/tests.yml?style=for-the-badge&logo=pytest&logoColor=white&label=Tests)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/multi_bioservices?style=for-the-badge&logo=python&logoColor=white)
+![Coveralls branch](https://img.shields.io/coverallsCoverage/github/JoshLoecker/multi_bioservices?branch=master&style=for-the-badge&logo=coveralls&logoColor=white)
 
 ## Description
 
