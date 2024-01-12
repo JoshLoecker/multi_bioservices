@@ -28,7 +28,7 @@ def _execute(
     taxon_id: int,
     sleep_time: float
     # progress_bar: Union[tqdm, None],
-) -> pd.DataFrame | list[str]:
+) -> Union[pd.DataFrame, list[str]]:
     try:
         time.sleep(sleep_time)
         results = biodbnet.db2db(
