@@ -84,7 +84,7 @@ def db2db(
     if use_progress_bar:
         tqdm_kwargs = tqdm_kwargs or {}
         total = tqdm_kwargs.pop("total", len(input_values))
-        pbar = tqdm(total=total, **tqdm_kwargs)
+        pbar = tqdm(total=total, leave=False, **tqdm_kwargs)
     
     queue_length: int = 0
     item_queue: Queue = Queue()

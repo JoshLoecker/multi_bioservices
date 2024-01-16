@@ -10,5 +10,5 @@ from multi_bioservices.biodbnet.output_database import OutputDatabase
 from multi_bioservices.biodbnet.taxon_id import TaxonID
 
 # Catch bioDBnet logging messages
-biodbnet_logger = logging.getLogger("bioservices.BioDBNet")
-biodbnet_logger.disabled = True
+# biodbnet_logger = logging.getLogger("bioservices.BioDBNet")
+# biodbnet_logger.disabled = True
