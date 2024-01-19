@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "multi_bioservices"
-version = "3.1.1"
+version = "3.1.2"
 description = "This is a multithreaded version of various BioServices functions"
 authors = ["Josh Loecker <joshloecker@icloud.com>"]
 readme = "README.md"
