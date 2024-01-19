@@ -118,14 +118,15 @@ def db2db(
             
             for future in as_completed(futures):
                 result: Union[pd.DataFrame, list[str]] = future.result()
-                if isinstance(result, list):
+                if isinstance(result, list) or isinstance(result, int):
                     failed_count += 1
                     item_queue.put(result)
-                    pbar.set_postfix_str(
-                        f"failed count: {failed_count}, "
-                        f"max threads: {max_threads}, "
-                        f"sleep count: {sleep_count}"
-                    )
+                    if use_progress_bar:
+                        pbar.set_postfix_str(
+                            f"failed count: {failed_count}, "
+                            f"max threads: {max_threads}, "
+                            f"sleep count: {sleep_count}"
+                        )
                     
                     if failed_count % 3 == 0:
                         # Reduce max workers by 1
@@ -133,14 +134,17 @@ def db2db(
                         executor._max_workers = max_threads
                         sleep_count += 1
                         time.sleep(5)
-                        pbar.set_postfix_str(
-                            f"failed count: {failed_count},"
-                            f"max threads: {max_threads},"
-                            f"sleep count: {sleep_count}"
-                        )
+                        if use_progress_bar:
+                            pbar.set_postfix_str(
+                                f"failed count: {failed_count},"
+                                f"max threads: {max_threads},"
+                                f"sleep count: {sleep_count}"
+                            )
                     
                     continue
-                elif result.empty:
+                elif isinstance(result, pd.DataFrame) and result.empty:
+                    if use_progress_bar:
+                        pbar.update(0)
                     continue
                 else:
                     if use_progress_bar:
