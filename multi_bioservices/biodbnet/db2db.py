@@ -98,7 +98,6 @@ def db2db(
         input_db=input_db_value,
         output_db=output_db_values,
         taxon_id=taxon_id_value,
-        sleep_time=random.uniform(0, 5),
         item_queue=item_queue
     )
     
@@ -114,7 +113,7 @@ def db2db(
                 if item is None:
                     completed_items += 1
                     continue
-                futures.append(executor.submit(partial_func, input_values=item))
+                futures.append(executor.submit(partial_func, input_values=item, sleep_time=random.uniform(0, 5)))
             
             for future in as_completed(futures):
                 result: Union[pd.DataFrame, list[str]] = future.result()
