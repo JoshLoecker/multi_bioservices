@@ -150,6 +150,7 @@ def db2db(
                         conversion_df,
                         result
                     ])
+                    completed_items += 1
     
     conversion_df = conversion_df.reset_index(names=[input_db_value])
     
